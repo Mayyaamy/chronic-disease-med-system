@@ -1,0 +1,10 @@
+POST http://localhost:8081/patient/update
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInVzZXJJZCI6NSwiZXhwIjoxNzgyODkyODY5fQ.vNX26u5Hqg8M-f07TJrVcSeNMBWR_fMg5azoWYQPTiw
+
+{
+  "id":4,
+  "name":"张三三",
+  "age":59,
+  "chronicType":"高血压+高血脂"
+}

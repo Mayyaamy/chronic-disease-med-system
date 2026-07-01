@@ -1,0 +1,12 @@
+POST http://localhost:8081/follow/add
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInVzZXJJZCI6NSwiZXhwIjoxNzgyODkyODY5fQ.vNX26u5Hqg8M-f07TJrVcSeNMBWR_fMg5azoWYQPTiw
+
+{
+  "patientId":4,
+  "followDate": "2026-07-01",
+  "bloodPressure": "135/85mmHg",
+  "bloodSugar": "6.8mmol/L",
+  "medicineRecord": "每日硝苯地平一片",
+  "doctorSuggest": "低盐饮食，每周监测三次血压"
+}

@@ -1,0 +1,12 @@
+POST http://localhost:8081/patient/add
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInVzZXJJZCI6NSwiZXhwIjoxNzgyODkyODY5fQ.vNX26u5Hqg8M-f07TJrVcSeNMBWR_fMg5azoWYQPTiw
+
+{
+  "name":"张三",
+  "age":58,
+  "gender":1,
+  "phone":"13512345679",
+  "chronicType":"高血压",
+  "address":"杭州市临安区花漫里小区"
+}

@@ -1,0 +1,5 @@
+POST http://localhost:8081/auth/updateInfo
+Content-Type: application/x-www-form-urlencoded
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInVzZXJJZCI6NSwiZXhwIjoxNzgyODg5ODgwfQ.84xkygvOEXih5G3_u_KTJdIFlhbr80t0pO1kUJfTXBg
+
+phone=13999998881
