@@ -3,36 +3,40 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>com.med</groupId>
     <artifactId>chronic-disease-parent</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
-    <name>chronic-disease-parent</name>
-    <description>慢病管理系统-父工程统一版本管理</description>
+    <name>慢病管理系统-父工程</name>
+    <description>Maven多模块统一版本管控父工程</description>
 
-    <!-- 子模块列表 -->
+    <!-- 同级三模块聚合（无嵌套，路径正确适配同级目录） -->
     <modules>
         <module>../common</module>
         <module>../auth-service</module>
     </modules>
 
-    <!-- 全局编码 + JDK版本配置（解决GBK中文乱码报错核心配置） -->
+    <!-- 全局统一版本变量 -->
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <maven.compiler.release>17</maven.compiler.release>
-        <spring.boot.version>3.2.5</spring.boot.version>
-        <spring.cloud.alibaba.version>2023.0.1.0</spring.cloud.alibaba.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring.boot.version>3.1.5</spring.boot.version>
+        <spring.cloud.alibaba.version>2022.0.0.0</spring.cloud.alibaba.version>
+        <mybatis.plus.version>3.5.3.1</mybatis.plus.version>
+        <lombok.version>1.18.30</lombok.version>
+        <druid.version>1.2.18</druid.version>
+        <jwt.version>0.11.5</jwt.version>
+        <knife4j.version>4.3.0</knife4j.version>
+        <redis.version>3.1.5</redis.version>
+        <mysql.version>8.0.33</mysql.version>
+        <junit.version>5.9.2</junit.version>
     </properties>
 
-    <!-- 统一依赖版本管理，子模块无需写version -->
+    <!-- 统一依赖版本管控：子模块只写groupId+artifactId，禁止声明version -->
     <dependencyManagement>
         <dependencies>
-            <!-- SpringBoot 版本管控 -->
+            <!-- SpringBoot 父依赖 -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -41,7 +45,7 @@
                 <scope>import</scope>
             </dependency>
 
-            <!-- SpringCloud Alibaba 版本管控 -->
+            <!-- Spring Cloud Alibaba 微服务全套 -->
             <dependency>
                 <groupId>com.alibaba.cloud</groupId>
                 <artifactId>spring-cloud-alibaba-dependencies</artifactId>
@@ -50,70 +54,121 @@
                 <scope>import</scope>
             </dependency>
 
-            <!-- MyBatis整合SpringBoot -->
+            <!-- 公共模块 -->
             <dependency>
-                <groupId>org.mybatis.spring.boot</groupId>
-                <artifactId>mybatis-spring-boot-starter</artifactId>
-                <version>3.0.3</version>
+                <groupId>com.med</groupId>
+                <artifactId>common</artifactId>
+                <version>1.0.0</version>
             </dependency>
 
+            <!-- MyBatis-Plus -->
             <dependency>
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-boot-starter</artifactId>
-                <version>3.5.5</version>
-            </dependency>
-
-            <!-- Druid连接池 -->
-            <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>druid-spring-boot-starter</artifactId>
-                <version>1.2.20</version>
+                <version>${mybatis.plus.version}</version>
             </dependency>
 
             <!-- MySQL驱动 -->
             <dependency>
                 <groupId>com.mysql</groupId>
                 <artifactId>mysql-connector-j</artifactId>
-                <version>8.4.0</version>
+                <version>${mysql.version}</version>
+                <scope>runtime</scope>
             </dependency>
 
-            <!-- JWT令牌依赖 -->
+            <!-- Druid连接池 -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-3-starter</artifactId>
+                <version>${druid.version}</version>
+            </dependency>
+
+            <!-- Lombok -->
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- JWT令牌 -->
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt-api</artifactId>
-                <version>0.11.5</version>
+                <version>${jwt.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt-impl</artifactId>
-                <version>0.11.5</version>
+                <version>${jwt.version}</version>
+                <scope>runtime</scope>
             </dependency>
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt-jackson</artifactId>
-                <version>0.11.5</version>
+                <version>${jwt.version}</version>
+                <scope>runtime</scope>
             </dependency>
 
-            <!-- 公共模块依赖 -->
+            <!-- Redis缓存 -->
             <dependency>
-                <groupId>com.med</groupId>
-                <artifactId>common</artifactId>
-                <version>1.0.0</version>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-redis</artifactId>
+                <version>${redis.version}</version>
+            </dependency>
+
+            <!-- Knife4j接口文档 -->
+            <dependency>
+                <groupId>com.github.xiaoymin</groupId>
+                <artifactId>knife4j-spring-boot-starter</artifactId>
+                <version>${knife4j.version}</version>
+            </dependency>
+
+            <!-- OpenFeign远程调用 -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-openfeign</artifactId>
+            </dependency>
+
+            <!-- Nacos 注册中心+配置中心 -->
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+            </dependency>
+
+            <!-- 单元测试 JUnit5 -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-test</artifactId>
+                <version>${spring.boot.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
 
-    <!-- 插件版本统一管理 -->
+    <!-- 全局统一构建配置 -->
     <build>
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                    <version>${spring.boot.version}</version>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.11.0</version>
+                    <configuration>
+                        <source>17</source>
+                        <target>17</target>
+                        <encoding>UTF-8</encoding>
+                        <!-- 保留方法参数名，解决@RequestParam报错 -->
+                        <compilerArgs>
+                            <arg>-parameters</arg>
+                        </compilerArgs>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
     </build>
-
 </project>
