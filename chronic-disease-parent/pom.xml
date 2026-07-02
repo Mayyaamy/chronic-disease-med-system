@@ -14,6 +14,8 @@
     <modules>
         <module>../common</module>
         <module>../auth-service</module>
+        <module>../gateway</module>
+        <module>../patient-service</module>
     </modules>
 
     <!-- 全局统一版本变量 -->
@@ -130,6 +132,25 @@
                 <artifactId>spring-cloud-starter-openfeign</artifactId>
             </dependency>
 
+            <!-- Spring Cloud Gateway 网关 -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-gateway</artifactId>
+            </dependency>
+
+            <!-- 排除网关默认reactor依赖冲突（SpringBoot3适配） -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-web</artifactId>
+                <version>${spring.boot.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-starter-web</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
             <!-- Nacos 注册中心+配置中心 -->
             <dependency>
                 <groupId>com.alibaba.cloud</groupId>
@@ -149,6 +170,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
 
     <!-- 全局统一构建配置 -->
     <build>
