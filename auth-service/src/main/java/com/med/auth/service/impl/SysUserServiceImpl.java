@@ -1,135 +1,66 @@
 package com.med.auth.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.med.auth.entity.SysUser;
 import com.med.auth.mapper.SysUserMapper;
 import com.med.auth.service.SysUserService;
-import com.med.auth.util.JwtUtil;
-import com.med.auth.util.PasswordUtil;
+import com.med.common.exception.BusinessException;
 import com.med.common.result.Result;
+import com.med.common.result.ResultCodeEnum;
+import com.med.common.util.JwtUtil;
+import com.med.common.util.MD5Util;
+import com.med.common.util.RedisUtil;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
-import java.util.List;
+
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> implements SysUserService {
+    @Resource
+    private JwtUtil jwtUtil;
+    @Resource
+    private RedisUtil redisUtil;
 
     @Override
-    public void register(SysUser sysUser) {
-        SysUser exist = getByUsername(sysUser.getUsername());
-        if(exist != null){
-            throw new RuntimeException("账号已存在");
-        }
-        sysUser.setPassword(PasswordUtil.encryptPwd(sysUser.getPassword()));
-        sysUser.setStatus(1);
-        save(sysUser);
-    }
-
-    @Override
-    public String login(SysUser sysUser) {
-        SysUser user = getByUsername(sysUser.getUsername());
-        if(user == null){
-            throw new RuntimeException("账号不存在");
-        }
-        if(user.getStatus() == 0){
-            throw new RuntimeException("账号已被禁用");
-        }
-        if(!PasswordUtil.checkPwd(sysUser.getPassword(), user.getPassword())){
-            throw new RuntimeException("密码错误");
-        }
-        return JwtUtil.generateToken(user.getId());
-    }
-
-    @Override
-    public SysUser getByUsername(String username) {
+    public Result<String> login(String username, String password) {
         LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(SysUser::getUsername, username);
-        return getOne(wrapper);
-    }
-
-    @Override
-    public void updatePwd(Long userId, String oldPwd, String newPwd) {
-        SysUser user = getById(userId);
-        if(user == null) throw new RuntimeException("用户不存在");
-        if(!PasswordUtil.checkPwd(oldPwd, user.getPassword())){
-            throw new RuntimeException("原密码错误");
+        SysUser user = getOne(wrapper);
+        if (user == null) {
+            throw new BusinessException(ResultCodeEnum.PWD_ERROR);
         }
-        user.setPassword(PasswordUtil.encryptPwd(newPwd));
-        updateById(user);
-    }
-
-    @Override
-    public Result<?> userPage(Long pageNum, Long pageSize, String keyword) {
-        IPage<SysUser> page = new Page<>(pageNum, pageSize);
-        LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
-        if(keyword != null && !keyword.isEmpty()){
-            wrapper.like(SysUser::getUsername, keyword).or().like(SysUser::getRealName, keyword);
+        if (!MD5Util.encrypt(password).equals(user.getPassword())) {
+            throw new BusinessException(ResultCodeEnum.PWD_ERROR);
         }
-        page(page, wrapper);
-        return Result.success(page);
-    }
-
-    @Override
-    public SysUser getLoginUser() {
-        SysUser user = JwtUtil.getLoginUser();
-        if(user == null) throw new RuntimeException("未登录");
-        return user;
-    }
-
-    @Override
-    public void changeStatus(Long userId, Integer status) {
-        SysUser user = getById(userId);
-        if(user == null) throw new RuntimeException("用户不存在");
-        user.setStatus(status);
-        updateById(user);
-    }
-
-    // ===================== 新增方法实现 =====================
-    @Override
-    public List<SysUser> listAllUserSimple() {
-        LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
-        wrapper.select(SysUser::getId, SysUser::getUsername, SysUser::getRealName);
-        return list(wrapper);
-    }
-
-    @Override
-    public Long countAllUser() {
-        return count();
-    }
-
-    @Override
-    public Long countEnableUser() {
-        LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SysUser::getStatus,1);
-        return count(wrapper);
-    }
-
-    @Override
-    public Long countDisableUser() {
-        LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SysUser::getStatus,0);
-        return count(wrapper);
-    }
-
-    @Override
-    public void resetPwd(Long userId) {
-        SysUser user = getById(userId);
-        if(user == null) throw new RuntimeException("用户不存在");
-        user.setPassword(PasswordUtil.encryptPwd("123456"));
-        updateById(user);
-    }
-
-    @Override
-    public void updateAvatar(Long userId, String avatarUrl) {
-        SysUser login = getLoginUser();
-        if(!login.getId().equals(userId)){
-            throw new RuntimeException("仅可修改自己头像");
+        if (user.getStatus() == 0) {
+            throw new BusinessException("账号已被禁用");
         }
-        SysUser user = new SysUser();
-        user.setId(userId);
-        user.setAvatar(avatarUrl);
-        updateById(user);
+        // 生成Token
+        String token = jwtUtil.generateToken(user.getId());
+        // Redis缓存登录态，有效期24小时
+        redisUtil.setExpire("login:user:" + user.getId(), token, 24, TimeUnit.HOURS);
+        return Result.success(token);
+    }
+
+    @Override
+    public Result<Void> register(SysUser user) {
+        LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(SysUser::getUsername, user.getUsername());
+        if (exists(wrapper)) {
+            throw new BusinessException(ResultCodeEnum.USER_EXIST);
+        }
+        user.setPassword(MD5Util.encrypt(user.getPassword()));
+        user.setStatus(1);
+        save(user);
+        return Result.success();
+    }
+
+    @Override
+    public Result<SysUser> getCurrentUser(Long userId) {
+        SysUser user = getById(userId);
+        user.setPassword(null);
+        return Result.success(user);
     }
 }
