@@ -5,124 +5,114 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.med.auth.entity.MedicineOrder;
-import com.med.auth.entity.SysUser;
 import com.med.auth.mapper.MedicineOrderMapper;
 import com.med.auth.service.MedicineOrderService;
-import com.med.auth.service.PatientService;
-import com.med.auth.service.SysUserService;
+import com.med.common.exception.BusinessException;
 import com.med.common.result.Result;
 import org.springframework.stereotype.Service;
-import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class MedicineOrderServiceImpl extends ServiceImpl<MedicineOrderMapper, MedicineOrder> implements MedicineOrderService {
 
-    private final SysUserService sysUserService;
-    private final PatientService patientService;
-
-    public MedicineOrderServiceImpl(SysUserService sysUserService, PatientService patientService) {
-        this.sysUserService = sysUserService;
-        this.patientService = patientService;
-    }
-
     @Override
-    public void addOrder(MedicineOrder order) {
-        SysUser login = sysUserService.getLoginUser();
-        patientService.checkPatientOwner(order.getPatientId());
-        order.setUserId(login.getId());
-        save(order);
-    }
-
-    @Override
-    public void updateOrder(MedicineOrder order) {
-        checkOrderOwner(order.getId());
-        patientService.checkPatientOwner(order.getPatientId());
-        updateById(order);
-    }
-
-    @Override
-    public void deleteOrder(Long id) {
-        checkOrderOwner(id);
-        removeById(id);
-    }
-
-    @Override
-    public MedicineOrder getOrderById(Long id) {
-        checkOrderOwner(id);
-        return getById(id);
-    }
-
-    @Override
-    public Result<?> orderPage(Long patientId, Long pageNum, Long pageSize) {
-        patientService.checkPatientOwner(patientId);
-        IPage<MedicineOrder> page = new Page<>(pageNum, pageSize);
+    public Result<IPage<MedicineOrder>> pageOrder(Long loginUserId, Long pageNum, Long pageSize, Long patientId) {
+        Page<MedicineOrder> page = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<MedicineOrder> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(MedicineOrder::getPatientId, patientId);
-        page(page, wrapper);
-        return Result.success(page);
-    }
-
-    @Override
-    public void checkOrderOwner(Long orderId) {
-        if (orderId == null) throw new RuntimeException("医嘱ID不能为空");
-        MedicineOrder order = getById(orderId);
-        if (order == null) throw new RuntimeException("用药医嘱不存在");
-        SysUser login = sysUserService.getLoginUser();
-        if (!order.getUserId().equals(login.getId())) {
-            throw new RuntimeException("无权限操作该用药医嘱");
+        wrapper.eq(MedicineOrder::getUserId, loginUserId);
+        if (patientId != null) {
+            wrapper.eq(MedicineOrder::getPatientId, patientId);
         }
-    }
-
-    // ========== 新增6实现 ==========
-    @Override
-    public Long countTotalOrder() {
-        SysUser login = sysUserService.getLoginUser();
-        LambdaQueryWrapper<MedicineOrder> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(MedicineOrder::getUserId, login.getId());
-        return count(wrapper);
+        IPage<MedicineOrder> pageData = page(page, wrapper);
+        return Result.success(pageData);
     }
 
     @Override
-    public List<String> getDistinctMedicineName() {
-        SysUser login = sysUserService.getLoginUser();
-        LambdaQueryWrapper<MedicineOrder> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(MedicineOrder::getUserId, login.getId()).select(MedicineOrder::getMedicineName);
-        return list(wrapper).stream().map(MedicineOrder::getMedicineName).distinct().collect(Collectors.toList());
+    public Result<Void> addOrder(MedicineOrder order, Long loginUserId) {
+        order.setUserId(loginUserId);
+        save(order);
+        return Result.success();
     }
 
     @Override
-    public MedicineOrder getLatestOrderByPatient(Long patientId) {
-        patientService.checkPatientOwner(patientId);
-        LambdaQueryWrapper<MedicineOrder> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(MedicineOrder::getPatientId, patientId).orderByDesc(MedicineOrder::getCreateTime);
-        return getOne(wrapper);
+    public Result<Void> updateOrder(MedicineOrder order, Long loginUserId) {
+        MedicineOrder db = getById(order.getId());
+        if (db == null) throw new BusinessException("医嘱数据不存在");
+        if (!db.getUserId().equals(loginUserId)) throw new BusinessException(403, "无权修改他人医嘱");
+        order.setUserId(null);
+        updateById(order);
+        return Result.success();
     }
 
     @Override
-    public Result<?> getExpireSoonOrder() {
-        SysUser login = sysUserService.getLoginUser();
+    public Result<Void> deleteOrder(Long id, Long loginUserId) {
+        MedicineOrder db = getById(id);
+        if (db == null) throw new BusinessException("医嘱数据不存在");
+        if (!db.getUserId().equals(loginUserId)) throw new BusinessException(403, "无权删除他人医嘱");
+        removeById(id);
+        return Result.success();
+    }
+
+    @Override
+    public Result<Void> batchDelete(List<Long> ids, Long loginUserId) {
+        for (Long id : ids) {
+            deleteOrder(id, loginUserId);
+        }
+        return Result.success();
+    }
+
+    @Override
+    public Result<MedicineOrder> getOrderById(Long id, Long loginUserId) {
+        MedicineOrder db = getById(id);
+        if (db == null) throw new BusinessException("医嘱数据不存在");
+        if (!db.getUserId().equals(loginUserId)) throw new BusinessException(403, "无权查看他人医嘱");
+        return Result.success(db);
+    }
+
+    @Override
+    public Result<List<MedicineOrder>> listByPatient(Long patientId, Long loginUserId) {
         LambdaQueryWrapper<MedicineOrder> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(MedicineOrder::getUserId, login.getId());
+        wrapper.eq(MedicineOrder::getUserId, loginUserId)
+                .eq(MedicineOrder::getPatientId, patientId)
+                .orderByDesc(MedicineOrder::getCreateTime);
         return Result.success(list(wrapper));
     }
 
     @Override
-    public void batchDeleteOrder(List<Long> ids) {
-        for(Long id : ids) checkOrderOwner(id);
-        removeByIds(ids);
+    public Result<List<String>> distinctMedicineName(Long loginUserId) {
+        LambdaQueryWrapper<MedicineOrder> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(MedicineOrder::getUserId, loginUserId)
+                .select(MedicineOrder::getMedicineName);
+        List<MedicineOrder> list = list(wrapper);
+        List<String> nameList = list.stream()
+                .map(MedicineOrder::getMedicineName)
+                .distinct()
+                .collect(Collectors.toList());
+        return Result.success(nameList);
     }
 
     @Override
-    public Result<?> monthOrderStat(String yearMonth) {
-        SysUser login = sysUserService.getLoginUser();
-        YearMonth ym = YearMonth.parse(yearMonth, DateTimeFormatter.ofPattern("yyyy-MM"));
+    public Result<Long> countByMonth(Long loginUserId, String yearMonth) {
         LambdaQueryWrapper<MedicineOrder> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(MedicineOrder::getUserId, login.getId())
-                .ge(MedicineOrder::getCreateTime, ym.atDay(1))
-                .le(MedicineOrder::getCreateTime, ym.atEndOfMonth());
+        wrapper.eq(MedicineOrder::getUserId, loginUserId)
+                .apply("DATE_FORMAT(create_time,'%Y-%m') = {0}", yearMonth);
+        return Result.success(count(wrapper));
+    }
+
+    @Override
+    public Result<Long> totalCount(Long loginUserId) {
+        LambdaQueryWrapper<MedicineOrder> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(MedicineOrder::getUserId, loginUserId);
+        return Result.success(count(wrapper));
+    }
+
+    @Override
+    public Result<List<MedicineOrder>> remindList(Long loginUserId) {
+        LambdaQueryWrapper<MedicineOrder> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(MedicineOrder::getUserId, loginUserId)
+                .orderByDesc(MedicineOrder::getCreateTime)
+                .last("limit 5");
         return Result.success(list(wrapper));
     }
 }

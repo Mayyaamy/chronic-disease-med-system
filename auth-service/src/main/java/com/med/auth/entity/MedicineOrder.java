@@ -11,7 +11,9 @@ import java.time.LocalDateTime;
 public class MedicineOrder {
     @TableId(type = IdType.AUTO)
     private Long id;
+    // 创建医护ID（数据归属、越权校验）
     private Long userId;
+    // 所属患者ID
     private Long patientId;
     private String medicineName;
     private String dosage;
