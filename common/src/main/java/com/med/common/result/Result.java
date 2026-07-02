@@ -2,22 +2,23 @@ package com.med.common.result;
 
 import lombok.Data;
 
+/**
+ * 全局统一JSON返回封装
+ */
 @Data
 public class Result<T> {
     private Integer code;
     private String msg;
     private T data;
 
-    // 自定义提示字符串成功
-    public static Result<String> success(String msg) {
-        Result<String> r = new Result<>();
+    // 成功静态方法
+    public static <T> Result<T> success() {
+        Result<T> r = new Result<>();
         r.setCode(200);
-        r.setMsg(msg);
-        r.setData(null);
+        r.setMsg("操作成功");
         return r;
     }
 
-    // 带数据成功
     public static <T> Result<T> success(T data) {
         Result<T> r = new Result<>();
         r.setCode(200);
@@ -26,30 +27,25 @@ public class Result<T> {
         return r;
     }
 
-    // 无返回值成功
-    public static <T> Result<T> success() {
+    // 失败静态方法
+    public static <T> Result<T> fail() {
         Result<T> r = new Result<>();
-        r.setCode(200);
-        r.setMsg("操作成功");
-        r.setData(null);
+        r.setCode(500);
+        r.setMsg("操作失败");
         return r;
     }
 
-    // 自定义错误码+信息
-    public static <T> Result<T> error(Integer code, String msg) {
-        Result<T> r = new Result<>();
-        r.setCode(code);
-        r.setMsg(msg);
-        r.setData(null);
-        return r;
-    }
-
-    // 默认500异常
-    public static <T> Result<T> error(String msg) {
+    public static <T> Result<T> fail(String msg) {
         Result<T> r = new Result<>();
         r.setCode(500);
         r.setMsg(msg);
-        r.setData(null);
+        return r;
+    }
+
+    public static <T> Result<T> fail(Integer code, String msg) {
+        Result<T> r = new Result<>();
+        r.setCode(code);
+        r.setMsg(msg);
         return r;
     }
 }

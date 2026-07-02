@@ -3,20 +3,20 @@ package com.med.common.util;
 import jakarta.annotation.Resource;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
+
 import java.util.concurrent.TimeUnit;
 
 @Component
 public class RedisUtil {
-
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
 
-    // 设置值
+    // 设置字符串
     public void set(String key, Object value) {
         redisTemplate.opsForValue().set(key, value);
     }
 
-    // 设置值+过期时间
+    // 设置带过期时间
     public void setExpire(String key, Object value, long time, TimeUnit unit) {
         redisTemplate.opsForValue().set(key, value, time, unit);
     }
