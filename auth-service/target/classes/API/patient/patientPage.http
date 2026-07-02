@@ -1,2 +1,2 @@
 GET http://localhost:8081/patient/page?pageNum=1&pageSize=10
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInVzZXJJZCI6NSwiZXhwIjoxNzgyODkyODY5fQ.vNX26u5Hqg8M-f07TJrVcSeNMBWR_fMg5azoWYQPTiw
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInVzZXJJZCI6MSwiZXhwIjoxNzgyOTI4MDYwfQ.4Fb2mrN90AMt8pyZ2WiBI8ZkS6DMB8W1mXTdryKe5uM

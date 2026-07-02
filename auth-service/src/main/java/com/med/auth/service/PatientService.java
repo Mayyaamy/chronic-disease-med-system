@@ -1,22 +1,25 @@
 package com.med.auth.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.med.auth.entity.Patient;
+import com.med.common.result.Result;
+import java.util.List;
 
-public interface PatientService {
+public interface PatientService extends IService<Patient> {
+    void addPatient(Patient patient);
+    void updatePatient(Patient patient);
+    void deletePatient(Long id);
+    Patient getPatientById(Long id);
+    Result<?> patientPage(Long pageNum, Long pageSize, String chronicType);
+    Long countMyPatient();
+    void checkPatientOwner(Long patientId);
 
-    // 新增患者档案
-    void addPatient(Patient patient, Long loginUserId);
-
-    // 修改患者档案（校验归属本人）
-    void updatePatient(Patient patient, Long loginUserId);
-
-    // 删除患者档案（校验归属本人）
-    void deletePatient(Long patientId, Long loginUserId);
-
-    // 根据ID查询单条详情（校验归属本人）
-    Patient getPatientById(Long patientId, Long loginUserId);
-
-    // 分页查询当前登录用户自己的所有患者
-    Page<Patient> pagePatient(Long loginUserId, Long pageNum, Long pageSize);
+    // 新增7个方法
+    List<Patient> listPatientNameSimple();
+    Long countPatientByType(String chronicType);
+    Double getAvgAge();
+    Patient getOldestPatient();
+    Patient getLatestPatient();
+    void batchDeletePatient(List<Long> ids);
+    Patient searchPatientByPhone(String phone);
 }

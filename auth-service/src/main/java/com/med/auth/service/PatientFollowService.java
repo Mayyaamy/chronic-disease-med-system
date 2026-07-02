@@ -1,21 +1,26 @@
 package com.med.auth.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.med.auth.entity.PatientFollow;
+import com.med.common.result.Result;
+import java.util.List;
 
-public interface PatientFollowService {
-    // 新增随访记录
-    void addFollow(PatientFollow follow, Long loginUserId);
+public interface PatientFollowService extends IService<PatientFollow> {
+    void addFollow(PatientFollow follow);
+    void updateFollow(PatientFollow follow);
+    void deleteFollow(Long id);
+    PatientFollow getFollowById(Long id);
+    Result<?> followPage(Long patientId, Long pageNum, Long pageSize);
+    Result<?> todayPendingList();
+    Result<?> overdueList();
+    void finishFollow(Long followId);
+    void checkFollowOwner(Long followId);
 
-    // 修改随访记录
-    void updateFollow(PatientFollow follow, Long loginUserId);
-
-    // 删除随访记录
-    void deleteFollow(Long followId, Long loginUserId);
-
-    // 根据ID查询单条随访详情
-    PatientFollow getFollowById(Long followId, Long loginUserId);
-
-    // 分页：查询某个患者的全部随访记录
-    Page<PatientFollow> pageFollowByPatient(Long patientId, Long loginUserId, Long pageNum, Long pageSize);
+    // 新增6方法
+    Long countTotalFollow();
+    Long countFinishFollow();
+    Long countUnfinishFollow();
+    Result<?> monthFollowList(String yearMonth);
+    void batchDeleteFollow(List<Long> ids);
+    PatientFollow getLatestFollowByPatient(Long patientId);
 }

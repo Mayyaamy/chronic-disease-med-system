@@ -1,67 +1,100 @@
 package com.med.auth.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.med.auth.entity.PatientFollow;
 import com.med.auth.service.PatientFollowService;
-import com.med.auth.util.JwtUtil;
 import com.med.common.result.Result;
-import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/follow")
 public class PatientFollowController {
 
-    @Resource
-    private PatientFollowService followService;
+    private final PatientFollowService followService;
 
-    @Resource
-    private JwtUtil jwtUtil;
-
-    // 获取当前登录用户ID
-    private Long getLoginUserId(HttpServletRequest request) {
-        String token = jwtUtil.getTokenFromRequest(request);
-        return jwtUtil.getUserIdByToken(token);
+    public PatientFollowController(PatientFollowService followService) {
+        this.followService = followService;
     }
 
-    // 新增随访记录
     @PostMapping("/add")
-    public Result<String> add(@RequestBody PatientFollow follow, HttpServletRequest request) {
-        followService.addFollow(follow, getLoginUserId(request));
-        return Result.ok("新增随访记录成功");
+    public Result<String> addFollow(@RequestBody PatientFollow follow) {
+        followService.addFollow(follow);
+        return Result.success("随访新增成功");
     }
 
-    // 修改随访记录
     @PostMapping("/update")
-    public Result<String> update(@RequestBody PatientFollow follow, HttpServletRequest request) {
-        followService.updateFollow(follow, getLoginUserId(request));
-        return Result.ok("修改随访记录成功");
+    public Result<String> updateFollow(@RequestBody PatientFollow follow) {
+        followService.updateFollow(follow);
+        return Result.success("随访修改成功");
     }
 
-    // 删除随访记录
-    @DeleteMapping("/delete/{id}")
-    public Result<String> delete(@PathVariable(value = "id") Long id, HttpServletRequest request) {
-        followService.deleteFollow(id, getLoginUserId(request));
-        return Result.ok("删除随访记录成功");
+    @DeleteMapping("/{id}")
+    public Result<String> deleteFollow(@PathVariable(value = "id") Long id) {
+        followService.deleteFollow(id);
+        return Result.success("随访删除成功");
     }
 
-    // 单条随访详情
     @GetMapping("/{id}")
-    public Result<PatientFollow> getInfo(@PathVariable(value = "id") Long id, HttpServletRequest request) {
-        PatientFollow follow = followService.getFollowById(id, getLoginUserId(request));
-        return Result.ok(follow);
+    public Result<PatientFollow> getFollow(@PathVariable(value = "id") Long id) {
+        return Result.success(followService.getFollowById(id));
     }
 
-    // 分页查询某个患者的所有随访
     @GetMapping("/page")
-    public Result<Page<PatientFollow>> page(
+    public Result<?> pageFollow(
             @RequestParam(value = "patientId") Long patientId,
-            @RequestParam(value = "pageNum", defaultValue = "1") Long pageNum,
-            @RequestParam(value = "pageSize", defaultValue = "10") Long pageSize,
-            HttpServletRequest request
+            @RequestParam(value = "pageNum") Long pageNum,
+            @RequestParam(value = "pageSize") Long pageSize
     ) {
-        Page<PatientFollow> page = followService.pageFollowByPatient(patientId, getLoginUserId(request), pageNum, pageSize);
-        return Result.ok(page);
+        return followService.followPage(patientId, pageNum, pageSize);
+    }
+
+    @GetMapping("/today/pending")
+    public Result<?> todayPending() {
+        return followService.todayPendingList();
+    }
+
+    @GetMapping("/overdue/list")
+    public Result<?> overdueList() {
+        return followService.overdueList();
+    }
+
+    @PutMapping("/finish")
+    public Result<String> finishFollow(
+            @RequestParam(value = "followId") Long followId
+    ) {
+        followService.finishFollow(followId);
+        return Result.success("随访标记完成");
+    }
+
+    // ========== 新增6接口 ==========
+    @GetMapping("/count/total")
+    public Result<Long> countTotal() {
+        return Result.success(followService.countTotalFollow());
+    }
+
+    @GetMapping("/count/finish")
+    public Result<Long> countFinish() {
+        return Result.success(followService.countFinishFollow());
+    }
+
+    @GetMapping("/count/unfinish")
+    public Result<Long> countUnfinish() {
+        return Result.success(followService.countUnfinishFollow());
+    }
+
+    @GetMapping("/month/list")
+    public Result<?> monthList(@RequestParam(value = "yearMonth") String yearMonth) {
+        return followService.monthFollowList(yearMonth);
+    }
+
+    @DeleteMapping("/batch")
+    public Result<String> batchDelete(@RequestBody List<Long> ids) {
+        followService.batchDeleteFollow(ids);
+        return Result.success("批量删除成功");
+    }
+
+    @GetMapping("/latest/{patientId}")
+    public Result<PatientFollow> latestFollow(@PathVariable(value = "patientId") Long patientId) {
+        return Result.success(followService.getLatestFollowByPatient(patientId));
     }
 }

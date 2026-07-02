@@ -1,74 +1,61 @@
 package com.med.auth.util;
 
-import com.med.auth.config.JwtProperties;
+import com.med.auth.entity.SysUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
 @Component
 public class JwtUtil {
+    private static final String SECRET = "ChronicMedSecretKey1234567890000000";
+    private static final long EXPIRE = 1000 * 60 * 60 * 24;
+    private static final SecretKey KEY = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
 
-    @Resource
-    private JwtProperties jwtProperties;
+    private static final ThreadLocal<SysUser> USER_LOCAL = new ThreadLocal<>();
 
-    private SecretKey getSecretKey() {
-        byte[] keyBytes = jwtProperties.getSecretKey().getBytes(StandardCharsets.UTF_8);
-        return Keys.hmacShaKeyFor(keyBytes);
+    // 设置登录用户
+    public static void setLoginUser(SysUser user) {
+        USER_LOCAL.set(user);
     }
 
-    // 生成token
-    public String generateToken(Long userId, String username) {
-        long now = System.currentTimeMillis();
-        long expireTime = now + jwtProperties.getExpireMs();
+    // 获取登录用户
+    public static SysUser getLoginUser() {
+        return USER_LOCAL.get();
+    }
+
+    // 清除
+    public static void clearLoginUser() {
+        USER_LOCAL.remove();
+    }
+
+    // 生成Token
+    public static String generateToken(Long userId) {
         return Jwts.builder()
-                .setSubject(username)
-                .claim("userId", userId)
-                .setExpiration(new java.util.Date(expireTime))
-                .signWith(getSecretKey())
+                .setSubject(userId.toString())
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRE))
+                .signWith(KEY)
                 .compact();
     }
 
-    // 从request拿token
-    public String getTokenFromRequest(jakarta.servlet.http.HttpServletRequest request) {
-        String header = request.getHeader("Authorization");
-        if (header != null && header.startsWith("Bearer ")) {
-            return header.substring(7);
-        }
-        return null;
-    }
-
-    // 解析用户名
-    public String getUsernameByToken(String token) {
+    // 解析Token获取UserId
+    public static Long getUserIdByToken(String token) {
         Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSecretKey())
+                .setSigningKey(KEY)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-        return claims.getSubject();
+        return Long.parseLong(claims.getSubject());
     }
 
-    // 解析userId
-    public Long getUserIdByToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSecretKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.get("userId", Long.class);
-    }
-
-    // 校验token是否有效
-    public boolean validateToken(String token) {
+    // 校验Token
+    public static boolean verifyToken(String token) {
         try {
-            Jwts.parserBuilder()
-                    .setSigningKey(getSecretKey())
-                    .build()
-                    .parseClaimsJws(token);
+            getUserIdByToken(token);
             return true;
         } catch (Exception e) {
             return false;

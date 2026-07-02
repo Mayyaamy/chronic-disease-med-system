@@ -1,21 +1,15 @@
 package com.med.auth.util;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.util.DigestUtils;
 
 public class PasswordUtil {
-    private static final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-
-    /**
-     * 明文密码加密
-     */
-    public static String encrypt(String rawPassword) {
-        return encoder.encode(rawPassword);
+    // MD5加密
+    public static String encryptPwd(String raw) {
+        return DigestUtils.md5DigestAsHex(raw.getBytes());
     }
 
-    /**
-     * 校验明文密码与加密密码是否匹配
-     */
-    public static boolean matches(String rawPassword, String encodedPassword) {
-        return encoder.matches(rawPassword, encodedPassword);
+    // 校验密码
+    public static boolean checkPwd(String raw, String encrypted) {
+        return encryptPwd(raw).equals(encrypted);
     }
 }

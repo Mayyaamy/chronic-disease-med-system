@@ -1,0 +1,75 @@
+### 1. 新增随访
+POST http://localhost:8081/follow/add
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+{
+  "patientId": 2,
+  "followDate": "2026-07-02",
+  "bloodPressure": "135/85",
+  "bloodSugar": "6.8",
+  "medicineRecord": "二甲双胍每日一片",
+  "doctorSuggest": "低盐饮食，每周监测血压"
+}
+
+### 2. 修改随访
+POST http://localhost:8081/follow/update
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+{
+  "id": 1,
+  "patientId": 2,
+  "bloodPressure": "130/82"
+}
+
+### 3. 删除单条随访
+DELETE http://localhost:8081/follow/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 4. 查询单条随访详情
+GET http://localhost:8081/follow/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 5. 某患者随访分页
+GET http://localhost:8081/follow/page?patientId=2&pageNum=1&pageSize=10
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 6. 今日待随访列表
+GET http://localhost:8081/follow/today/pending
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 7. 逾期未完成随访列表
+GET http://localhost:8081/follow/overdue/list
+Authorization: Bearer 替换为登录拿到的token
+
+### 8. 标记随访完成
+PUT http://localhost:8081/follow/finish?followId=1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 【新增1】本人随访总条数
+GET http://localhost:8081/follow/count/total
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 【新增2】已完成随访数量
+GET http://localhost:8081/follow/count/finish
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 【新增3】未完成随访数量
+GET http://localhost:8081/follow/count/unfinish
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 【新增4】按月查询随访
+GET http://localhost:8081/follow/month/list?yearMonth=2026-07
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 【新增5】批量删除随访
+DELETE http://localhost:8081/follow/batch
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+[2,3]
+
+### 【新增6】患者最近一条随访
+GET http://localhost:8081/follow/latest/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo

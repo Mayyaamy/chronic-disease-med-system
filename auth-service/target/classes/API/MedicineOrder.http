@@ -1,0 +1,61 @@
+### 1. 新增用药医嘱
+POST http://localhost:8081/medicineOrder/add
+Content-Type: application/json
+Authorization: Bearer 替换为登录拿到的token
+
+{
+  "patientId": 1,
+  "medicineName": "硝苯地平缓释片",
+  "dosage": "20mg",
+  "frequency": "每日两次",
+  "remark": "饭后温水服用"
+}
+
+### 2. 修改医嘱
+POST http://localhost:8081/medicineOrder/update
+Content-Type: application/json
+Authorization: Bearer 替换为登录拿到的token
+
+{
+  "id": 1,
+  "medicineName": "硝苯地平控释片"
+}
+
+### 3. 删除单条医嘱
+DELETE http://localhost:8081/medicineOrder/1
+Authorization: Bearer 替换为登录拿到的token
+
+### 4. 查询单条医嘱详情
+GET http://localhost:8081/medicineOrder/1
+Authorization: Bearer 替换为登录拿到的token
+
+### 5. 患者医嘱分页
+GET http://localhost:8081/medicineOrder/page?patientId=1&pageNum=1&pageSize=10
+Authorization: Bearer 替换为登录拿到的token
+
+### 【新增1】本人医嘱总数
+GET http://localhost:8081/medicineOrder/count/total
+Authorization: Bearer 替换为登录拿到的token
+
+### 【新增2】去重药品名称列表
+GET http://localhost:8081/medicineOrder/list/medicine-name
+Authorization: Bearer 替换为登录拿到的token
+
+### 【新增3】患者最新一条医嘱
+GET http://localhost:8081/medicineOrder/latest/1
+Authorization: Bearer 替换为登录拿到的token
+
+### 【新增4】用药提醒列表
+GET http://localhost:8081/medicineOrder/expire-soon
+Authorization: Bearer 替换为登录拿到的token
+
+### 【新增5】批量删除医嘱
+DELETE http://localhost:8081/medicineOrder/batch
+Content-Type: application/json
+Authorization: Bearer 替换为登录拿到的token
+
+[2,3]
+
+### 【新增6】月度医嘱统计
+GET http://localhost:8081/medicineOrder/month-stat?yearMonth=2026-07
+Authorization: Bearer 替换为登录拿到的token

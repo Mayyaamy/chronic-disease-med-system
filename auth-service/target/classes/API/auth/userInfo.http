@@ -1,2 +1,0 @@
-GET http://localhost:8081/auth/info
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInVzZXJJZCI6NSwiZXhwIjoxNzgyODg5ODgwfQ.84xkygvOEXih5G3_u_KTJdIFlhbr80t0pO1kUJfTXBg

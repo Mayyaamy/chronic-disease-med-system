@@ -1,74 +1,92 @@
 package com.med.auth.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.med.auth.entity.Patient;
 import com.med.auth.service.PatientService;
-import com.med.auth.util.JwtUtil;
 import com.med.common.result.Result;
-import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.Data;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/patient")
 public class PatientController {
 
-    @Resource
-    private PatientService patientService;
+    private final PatientService patientService;
 
-    @Resource
-    private JwtUtil jwtUtil;
-
-    // 获取当前登录用户ID
-    private Long getLoginUserId(HttpServletRequest request) {
-        String token = jwtUtil.getTokenFromRequest(request);
-        return jwtUtil.getUserIdByToken(token);
+    public PatientController(PatientService patientService) {
+        this.patientService = patientService;
     }
 
-    // 新增患者
     @PostMapping("/add")
-    public Result<String> add(@RequestBody Patient patient, HttpServletRequest request) {
-        patientService.addPatient(patient, getLoginUserId(request));
-        return Result.ok("新增患者档案成功");
+    public Result<String> addPatient(@RequestBody Patient patient) {
+        patientService.addPatient(patient);
+        return Result.success("患者新增成功");
     }
 
-    // 修改患者
     @PostMapping("/update")
-    public Result<String> update(@RequestBody Patient patient, HttpServletRequest request) {
-        patientService.updatePatient(patient, getLoginUserId(request));
-        return Result.ok("修改患者档案成功");
+    public Result<String> updatePatient(@RequestBody Patient patient) {
+        patientService.updatePatient(patient);
+        return Result.success("患者信息修改成功");
     }
 
-    // 删除患者
-    @DeleteMapping("/delete/{id}")
-    public Result<String> delete(@PathVariable(value = "id") Long id, HttpServletRequest request) {
-        patientService.deletePatient(id, getLoginUserId(request));
-        return Result.ok("删除患者档案成功");
+    @DeleteMapping("/{id}")
+    public Result<String> deletePatient(@PathVariable(value = "id") Long id) {
+        patientService.deletePatient(id);
+        return Result.success("患者删除成功");
     }
 
-    // 单条详情
     @GetMapping("/{id}")
-    public Result<Patient> getInfo(@PathVariable(value = "id") Long id, HttpServletRequest request) {
-        Patient patient = patientService.getPatientById(id, getLoginUserId(request));
-        return Result.ok(patient);
+    public Result<Patient> getPatient(@PathVariable(value = "id") Long id) {
+        return Result.success(patientService.getPatientById(id));
     }
 
-    // 分页查询本人档案
     @GetMapping("/page")
-    public Result<Page<Patient>> page(
-            @RequestParam(value = "pageNum", defaultValue = "1") Long pageNum,
-            @RequestParam(value = "pageSize", defaultValue = "10") Long pageSize,
-            HttpServletRequest request
+    public Result<?> pageList(
+            @RequestParam(value = "pageNum") Long pageNum,
+            @RequestParam(value = "pageSize") Long pageSize,
+            @RequestParam(value = "chronicType", required = false) String chronicType
     ) {
-        Page<Patient> page = patientService.pagePatient(getLoginUserId(request), pageNum, pageSize);
-        return Result.ok(page);
+        return patientService.patientPage(pageNum, pageSize, chronicType);
     }
 
-    // 分页入参封装（表单提交可用，JSON用上面@RequestBody即可）
-    @Data
-    public static class PageParam {
-        private Long pageNum;
-        private Long pageSize;
+    @GetMapping("/count")
+    public Result<Long> patientCount() {
+        return Result.success(patientService.countMyPatient());
+    }
+
+    // ========== 新增7接口 ==========
+    @GetMapping("/list/name")
+    public Result<List<Patient>> listPatientNameSimple() {
+        return Result.success(patientService.listPatientNameSimple());
+    }
+
+    @GetMapping("/count/by-type")
+    public Result<Long> countByType(@RequestParam(value = "chronicType") String chronicType) {
+        return Result.success(patientService.countPatientByType(chronicType));
+    }
+
+    @GetMapping("/age/avg")
+    public Result<Double> avgAge() {
+        return Result.success(patientService.getAvgAge());
+    }
+
+    @GetMapping("/oldest")
+    public Result<Patient> oldestPatient() {
+        return Result.success(patientService.getOldestPatient());
+    }
+
+    @GetMapping("/latest")
+    public Result<Patient> latestPatient() {
+        return Result.success(patientService.getLatestPatient());
+    }
+
+    @DeleteMapping("/batch")
+    public Result<String> batchDelete(@RequestBody List<Long> ids) {
+        patientService.batchDeletePatient(ids);
+        return Result.success("批量删除成功");
+    }
+
+    @GetMapping("/search/phone")
+    public Result<Patient> searchByPhone(@RequestParam(value = "phone") String phone) {
+        return Result.success(patientService.searchPatientByPhone(phone));
     }
 }

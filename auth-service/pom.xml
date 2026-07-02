@@ -17,32 +17,10 @@
     <!-- 强制锁定MyBatis-Plus版本，防止依赖仲裁偷换低版本 -->
     <properties>
         <mybatis.plus.version>3.5.5</mybatis.plus.version>
+        <jjwt.version>0.11.5</jjwt.version>
     </properties>
 
     <dependencies>
-        <!-- JWT -->
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-api</artifactId>
-            <version>0.11.5</version>
-        </dependency>
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-impl</artifactId>
-            <version>0.11.5</version>
-            <scope>runtime</scope>
-        </dependency>
-        <!-- SpringSecurity 密码加密 BCrypt -->
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-crypto</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-jackson</artifactId>
-            <version>0.11.5</version>
-            <scope>runtime</scope>
-        </dependency>
         <!-- SpringBoot Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -95,26 +73,41 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- 公共模块common -->
-        <dependency>
-            <groupId>com.med</groupId>
-            <artifactId>common</artifactId>
-        </dependency>
-
-        <!-- JWT -->
+        <!-- JWT 全套（去重统一版本） -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
+            <version>${jjwt.version}</version>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
+            <version>${jjwt.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
+            <version>${jjwt.version}</version>
             <scope>runtime</scope>
+        </dependency>
+
+        <!-- SpringSecurity 密码加密 BCrypt -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+        </dependency>
+
+        <!-- 公共模块common（内部包含JwtUtil工具类） -->
+        <dependency>
+            <groupId>com.med</groupId>
+            <artifactId>common</artifactId>
+        </dependency>
+
+        <!-- SpringBoot3 适配 @Resource 注解 jakarta包 -->
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
         </dependency>
 
         <!-- 单元测试 -->
@@ -122,12 +115,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-        </dependency>
-
-        <!-- SpringBoot3 适配 @Resource 注解 jakarta包 -->
-        <dependency>
-            <groupId>jakarta.annotation</groupId>
-            <artifactId>jakarta.annotation-api</artifactId>
         </dependency>
     </dependencies>
 

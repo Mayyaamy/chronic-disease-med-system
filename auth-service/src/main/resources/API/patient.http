@@ -1,0 +1,71 @@
+### 1. 新增患者
+POST http://localhost:8081/patient/add
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+{
+  "realName": "李大爷",
+  "age": 68,
+  "gender": "男",
+  "phone": "13900139000",
+  "chronicType": "高血压,糖尿病",
+  "address": "杭州市萧山区XX小区"
+}
+
+### 2. 修改患者
+POST http://localhost:8081/patient/update
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+{
+  "id": 2,
+  "realName": "李建国",
+  "age": 69
+}
+
+### 3. 删除单个患者
+DELETE http://localhost:8081/patient/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 4. 查询单个患者详情
+GET http://localhost:8081/patient/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 5. 患者分页查询
+GET http://localhost:8081/patient/page?pageNum=1&pageSize=10&chronicType=高血压
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 6. 统计本人患者总数
+GET http://localhost:8081/patient/count
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 【新增1】患者姓名下拉列表
+GET http://localhost:8081/patient/list/name
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 【新增2】按慢病类型统计数量
+GET http://localhost:8081/patient/count/by-type?chronicType=糖尿病
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 【新增3】本人患者平均年龄
+GET http://localhost:8081/patient/age/avg
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 【新增4】年龄最大患者
+GET http://localhost:8081/patient/oldest
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 【新增5】最近新增患者
+GET http://localhost:8081/patient/latest
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 【新增6】批量删除患者
+DELETE http://localhost:8081/patient/batch
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+[1]
+
+### 【新增7】手机号模糊查询患者
+GET http://localhost:8081/patient/search/phone?phone=139
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo

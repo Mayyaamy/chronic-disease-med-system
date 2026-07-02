@@ -1,0 +1,78 @@
+### 1. 注册账号
+POST http://localhost:8081/user/register
+Content-Type: application/json
+
+{
+  "username": "doctor01",
+  "password": "123456",
+  "realName": "张医生",
+  "role": 1
+}
+
+### 2. 登录（获取Token）
+POST http://localhost:8081/user/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "123456"
+}
+
+### 3. 根据用户名查询用户
+GET http://localhost:8081/user/get/username?username=admin
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 4. 修改个人信息
+POST http://localhost:8081/user/update/info
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+{
+  "id": 1,
+  "realName": "系统管理员",
+  "phone": "13800138000"
+}
+
+### 5. 修改密码
+POST http://localhost:8081/user/update/pwd?userId=1&oldPwd=123456&newPwd=654321
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 6. 用户分页列表
+GET http://localhost:8081/user/page?pageNum=1&pageSize=10&keyword=
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 7. 启用/禁用账号
+PUT http://localhost:8081/user/status?userId=2&status=0
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 8. 删除用户
+DELETE http://localhost:8081/user/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 9. 获取当前登录用户
+GET http://localhost:8081/user/current
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 【新增1】获取全部医护下拉列表
+GET http://localhost:8081/user/list/all
+Authorization: Bearer 替换为登录拿到的token
+
+### 【新增2】统计系统总用户
+GET http://localhost:8081/user/count/all
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 【新增3】统计正常状态用户数量
+GET http://localhost:8081/user/count/enable
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 【新增4】统计禁用用户数量
+GET http://localhost:8081/user/count/disable
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 【新增5】管理员重置用户密码
+POST http://localhost:8081/user/reset/pwd?userId=3
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
+
+### 【新增6】修改个人头像
+PUT http://localhost:8081/user/avatar?userId=1&avatarUrl=https://xxx/avatar.png
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzgzMDQzNTE1fQ.TlH6YPRU8hDfrPMAmolFuvB2cr9z8YkO1vZ36bacBqo
