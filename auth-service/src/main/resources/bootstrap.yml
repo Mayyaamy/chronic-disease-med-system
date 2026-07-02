@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: auth-service
+  cloud:
+    nacos:
+      # Nacos 注册中心地址
+      discovery:
+        server-addr: 127.0.0.1:8848
+        namespace: public
+      # Nacos 配置中心
+      config:
+        server-addr: 127.0.0.1:8848
+        namespace: public
+        # 配置文件后缀
+        file-extension: yaml
+        # 开启配置动态刷新
+        refresh-enabled: true
+        # 共享公共配置（后续多服务共用数据库Redis）
+        shared-configs:
+          - data-id: common-db-redis.yaml
+            refresh: true
+# 服务端口
+server:
+  port: 8081

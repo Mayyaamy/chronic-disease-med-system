@@ -1,9 +1,0 @@
-POST http://localhost:8081/follow/update
-Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInVzZXJJZCI6MSwiZXhwIjoxNzgyOTI4MDYwfQ.4Fb2mrN90AMt8pyZ2WiBI8ZkS6DMB8W1mXTdryKe5uM
-
-{
-  "id": 1,
-  "bloodPressure": "130/82mmHg",
-  "doctorSuggest": "坚持服药，一个月后复查"
-}
