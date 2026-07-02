@@ -5,139 +5,121 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.med.auth.entity.Patient;
-import com.med.auth.entity.SysUser;
 import com.med.auth.mapper.PatientMapper;
 import com.med.auth.service.PatientService;
-import com.med.auth.service.SysUserService;
+import com.med.common.exception.BusinessException;
 import com.med.common.result.Result;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PatientServiceImpl extends ServiceImpl<PatientMapper, Patient> implements PatientService {
 
-    private final SysUserService sysUserService;
-
-    public PatientServiceImpl(SysUserService sysUserService) {
-        this.sysUserService = sysUserService;
+    @Override
+    public Result<IPage<Patient>> pagePatient(Long userId, Long pageNum, Long pageSize, String keyword) {
+        Page<Patient> page = new Page<>(pageNum, pageSize);
+        LambdaQueryWrapper<Patient> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Patient::getUserId, userId);
+        if (keyword != null && !keyword.isEmpty()) {
+            wrapper.like(Patient::getRealName, keyword);
+        }
+        IPage<Patient> res = page(page, wrapper);
+        return Result.success(res);
     }
 
     @Override
-    public void addPatient(Patient patient) {
-        SysUser login = sysUserService.getLoginUser();
-        patient.setUserId(login.getId());
+    public Result<Void> addPatient(Patient patient, Long loginUserId) {
+        patient.setUserId(loginUserId);
         save(patient);
+        return Result.success();
     }
 
     @Override
-    public void updatePatient(Patient patient) {
-        checkPatientOwner(patient.getId());
+    public Result<Void> updatePatient(Patient patient, Long loginUserId) {
+        Patient db = getById(patient.getId());
+        if (db == null) throw new BusinessException("数据不存在");
+        if (!db.getUserId().equals(loginUserId)) throw new BusinessException(403, "无权修改他人数据");
+        patient.setUserId(null);
         updateById(patient);
+        return Result.success();
     }
 
     @Override
-    public void deletePatient(Long id) {
-        checkPatientOwner(id);
+    public Result<Void> deletePatient(Long id, Long loginUserId) {
+        Patient db = getById(id);
+        if (db == null) throw new BusinessException("数据不存在");
+        if (!db.getUserId().equals(loginUserId)) throw new BusinessException(403, "无权删除他人数据");
         removeById(id);
+        return Result.success();
     }
 
     @Override
-    public Patient getPatientById(Long id) {
-        checkPatientOwner(id);
-        return getById(id);
-    }
-
-    @Override
-    public Result<?> patientPage(Long pageNum, Long pageSize, String chronicType) {
-        SysUser login = sysUserService.getLoginUser();
-        IPage<Patient> page = new Page<>(pageNum, pageSize);
-        LambdaQueryWrapper<Patient> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Patient::getUserId, login.getId());
-        if (chronicType != null && !chronicType.trim().isEmpty()) {
-            wrapper.like(Patient::getChronicType, chronicType);
+    public Result<Void> batchDelete(List<Long> ids, Long loginUserId) {
+        for (Long id : ids) {
+            deletePatient(id, loginUserId);
         }
-        page(page, wrapper);
-        return Result.success(page);
+        return Result.success();
     }
 
     @Override
-    public Long countMyPatient() {
-        SysUser login = sysUserService.getLoginUser();
+    public Result<Patient> getPatientById(Long id, Long loginUserId) {
+        Patient db = getById(id);
+        if (db == null) throw new BusinessException("数据不存在");
+        if (!db.getUserId().equals(loginUserId)) throw new BusinessException(403, "无权查看他人数据");
+        return Result.success(db);
+    }
+
+    @Override
+    public Result<Long> countByChronicType(Long userId, String type) {
         LambdaQueryWrapper<Patient> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Patient::getUserId, login.getId());
-        return count(wrapper);
+        wrapper.eq(Patient::getUserId, userId).like(Patient::getChronicType, type);
+        return Result.success(count(wrapper));
     }
 
     @Override
-    public void checkPatientOwner(Long patientId) {
-        if (patientId == null) throw new RuntimeException("患者ID不能为空");
-        Patient patient = getById(patientId);
-        if (patient == null) throw new RuntimeException("患者不存在");
-        SysUser login = sysUserService.getLoginUser();
-        if (!patient.getUserId().equals(login.getId())) {
-            throw new RuntimeException("无权限操作该患者数据");
-        }
-    }
-
-    // ========== 新增7个实现 ==========
-    @Override
-    public List<Patient> listPatientNameSimple() {
-        SysUser login = sysUserService.getLoginUser();
+    public Result<List<Patient>> getNameList(Long userId) {
         LambdaQueryWrapper<Patient> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Patient::getUserId, login.getId());
+        wrapper.eq(Patient::getUserId, userId);
         wrapper.select(Patient::getId, Patient::getRealName);
-        return list(wrapper);
+        return Result.success(list(wrapper));
     }
 
     @Override
-    public Long countPatientByType(String chronicType) {
-        SysUser login = sysUserService.getLoginUser();
+    public Result<Double> getAvgAge(Long userId) {
         LambdaQueryWrapper<Patient> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Patient::getUserId, login.getId()).like(Patient::getChronicType, chronicType);
-        return count(wrapper);
-    }
-
-    @Override
-    public Double getAvgAge() {
-        SysUser login = sysUserService.getLoginUser();
-        LambdaQueryWrapper<Patient> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Patient::getUserId, login.getId()).isNotNull(Patient::getAge);
+        wrapper.eq(Patient::getUserId, userId);
         List<Patient> list = list(wrapper);
-        if(list.isEmpty()) return 0.0;
-        double sum = 0;
-        for(Patient p : list) sum += p.getAge();
-        return sum / list.size();
+        if (list.isEmpty()) return Result.success(0.0);
+        double sum = list.stream().mapToInt(p -> Optional.ofNullable(p.getAge()).orElse(0)).sum();
+        return Result.success(sum / list.size());
     }
 
     @Override
-    public Patient getOldestPatient() {
-        SysUser login = sysUserService.getLoginUser();
+    public Result<Patient> getMaxAgePatient(Long userId) {
         LambdaQueryWrapper<Patient> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Patient::getUserId, login.getId()).isNotNull(Patient::getAge);
-        wrapper.orderByDesc(Patient::getAge);
-        return getOne(wrapper);
+        wrapper.eq(Patient::getUserId, userId).orderByDesc(Patient::getAge).last("limit 1");
+        return Result.success(getOne(wrapper));
     }
 
     @Override
-    public Patient getLatestPatient() {
-        SysUser login = sysUserService.getLoginUser();
+    public Result<Patient> getLatestPatient(Long userId) {
         LambdaQueryWrapper<Patient> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Patient::getUserId, login.getId());
-        wrapper.orderByDesc(Patient::getCreateTime);
-        return getOne(wrapper);
+        wrapper.eq(Patient::getUserId, userId).orderByDesc(Patient::getCreateTime).last("limit 1");
+        return Result.success(getOne(wrapper));
     }
 
     @Override
-    public void batchDeletePatient(List<Long> ids) {
-        for(Long id : ids) checkPatientOwner(id);
-        removeByIds(ids);
-    }
-
-    @Override
-    public Patient searchPatientByPhone(String phone) {
-        SysUser login = sysUserService.getLoginUser();
+    public Result<List<Patient>> searchByPhone(Long userId, String phone) {
         LambdaQueryWrapper<Patient> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Patient::getUserId, login.getId()).like(Patient::getPhone, phone);
-        return getOne(wrapper);
+        wrapper.eq(Patient::getUserId, userId).like(Patient::getPhone, phone);
+        return Result.success(list(wrapper));
+    }
+
+    @Override
+    public Result<Long> totalCount(Long userId) {
+        LambdaQueryWrapper<Patient> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Patient::getUserId, userId);
+        return Result.success(count(wrapper));
     }
 }

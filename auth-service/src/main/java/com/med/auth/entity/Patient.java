@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 public class Patient {
     @TableId(type = IdType.AUTO)
     private Long id;
+    // 创建医护ID（数据归属，越权校验核心）
     private Long userId;
     private String realName;
     private Integer age;
