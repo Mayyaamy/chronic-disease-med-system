@@ -6,6 +6,8 @@
       <list>
         <option value="$PROJECT_DIR$/chronic-disease-parent/pom.xml" />
         <option value="$PROJECT_DIR$/auth-service/pom.xml" />
+        <option value="$PROJECT_DIR$/gateway/pom.xml" />
+        <option value="$PROJECT_DIR$/patient-service/pom.xml" />
       </list>
     </option>
   </component>
